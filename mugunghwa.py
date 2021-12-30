@@ -26,21 +26,12 @@ cv2.namedWindow('move_detect', cv2.WINDOW_NORMAL)
 
 
 # 미션 문제 설정
-pose_list = ['t', 'tree', 'warrior']
-pose_file_name = pose_list[random.randint(0,len(pose_list)-1)]
+pose_file_list = ['T Pose', 'Tree Pose', 'Warrior Pose']
+pose_file_name = pose_file_list[random.randint(0,len(pose_file_list)-1)]
+# pose_file_name = 'T Pose'
+qts.mission_pose = pose_file_name
 mission_image = cv2.imread('images/' + pose_file_name + '.jpg', cv2.IMREAD_COLOR)
 resize_mission_image = cv2.resize(mission_image, dsize=(640, 480))
-
-if pose_file_name == 't':
-    qts.mission_pose = 'T Pose'
-elif pose_file_name == 'tree':
-    qts.mission_pose = 'Tree Pose'
-elif pose_file_name == 'warrior':
-    qts.mission_pose = 'Warrior Pose'
-else:
-    pose_file_name = 'NOT DEFINED'
-
-qts.mission_pose = pose_file_name
 
 
 # 음성 출력 및 미션 문제 출력 (음성이 출력될 동안만 문제 출력)
