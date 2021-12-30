@@ -47,7 +47,9 @@ resize_mission_image = cv2.resize(mission_image, dsize=(640, 480))
 wave_obj = sa.WaveObject.from_wave_file("sound/assets_sound.wav")
 play_obj = wave_obj.play()
 while play_obj.is_playing():
+    cv2.namedWindow('!!! REMEMBER THIS POSE !!!', cv2.WINDOW_NORMAL)
     cv2.imshow('!!! REMEMBER THIS POSE !!!', resize_mission_image)
+    cv2.moveWindow('!!! REMEMBER THIS POSE !!!',400,100)
     k = cv2.waitKey(1) & 0xFF 
     if k == 27:
         break
@@ -84,13 +86,18 @@ while camera.isOpened():
     # 움직임 탐지 main 
     label = qts._move_detect(mask, display=False)
     cv2.imshow('move_detect', mask)
+    cv2.moveWindow('move_detect',1000,50)
+    cv2.resizeWindow('move_detect', 500, 500)
 
 
     # 포즈 탐지 main
     frame, landmarks = qts._pose_detect(frame, display=False)
     if landmarks:
         label = qts._pose_classify(landmarks, frame, display=False)
+        
     cv2.imshow('pose_detect', frame)
+    cv2.moveWindow('pose_detect', 50, 50)
+    cv2.resizeWindow('pose_detect', 900, 600)
 
 
     # 종료 조건
