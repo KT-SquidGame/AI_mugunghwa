@@ -13,14 +13,18 @@ class util():
 
     # __init__() : 변수 초기화 함수
     def __init__(self):
+        self.total_frame_count = 0
+
         self.move_start_time = 0 
         self.move_end_time = 0 
         self.move_result_time = 0 
+        self.move_frame_count = 0
 
         self.mission_pose = ''
         self.pose_start_time = 0 
         self.pose_end_time = 0 
         self.pose_result_time = 0 
+        self.pose_frame_count = 0
         
         # 움직임 탐지 임계 값
         self.MOVE_THRESHOLD = 2000 
@@ -179,6 +183,7 @@ class util():
                 self.pose_start_time = 0
                 
         elif label == self.mission_pose:
+            self.pose_frame_count += 1
             if self.pose_start_time == 0:
                 self.pose_start_time = time.time()
             
@@ -204,6 +209,8 @@ class util():
         # diff 값과 움직임 탐지 임계 값 비교
         if diff > self.MOVE_THRESHOLD:
             label = 'move'
+        else:
+            self.move_frame_count += 1
 
         # output image에 label 추가
         cv2.putText(mask, label, (10, 60),cv2.FONT_HERSHEY_PLAIN, 2, (127, 127, 127), 2)
