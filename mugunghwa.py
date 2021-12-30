@@ -16,35 +16,20 @@ qts = util()
 
 # 변수 및 window frame 설정
 robot_status = 'Scanning...' 
-total_game_time = 15 # 총 게임 시간
-knn = cv2.createBackgroundSubtractorKNN(history=1, dist2Threshold=10000, detectShadows=False)
+total_game_time = 15 # 총 게임 시간 (음악 재생 시간 포함)
+sound_file_name = 'assets_sound.wav'
+# pose_file_list = ['T Pose', 'Tree Pose', 'Warrior Pose']
+pose_file_list = ['T Pose']
 camera = cv2.VideoCapture(0)
+# camera = cv2.VideoCapture(1)
 camera.set(3,1280)
 camera.set(4,720)
 cv2.namedWindow('pose_detect', cv2.WINDOW_NORMAL)
 cv2.namedWindow('move_detect', cv2.WINDOW_NORMAL)
 
 
-# 미션 문제 설정
-pose_file_list = ['T Pose', 'Tree Pose', 'Warrior Pose']
-pose_file_name = pose_file_list[random.randint(0,len(pose_file_list)-1)]
-# pose_file_name = 'T Pose'
-qts.mission_pose = pose_file_name
-mission_image = cv2.imread('images/' + pose_file_name + '.jpg', cv2.IMREAD_COLOR)
-resize_mission_image = cv2.resize(mission_image, dsize=(640, 480))
-
-
-# 음성 출력 및 미션 문제 출력 (음성이 출력될 동안만 문제 출력)
-wave_obj = sa.WaveObject.from_wave_file("sound/assets_sound.wav")
-play_obj = wave_obj.play()
-while play_obj.is_playing():
-    cv2.namedWindow('!!! REMEMBER THIS POSE !!!', cv2.WINDOW_NORMAL)
-    cv2.imshow('!!! REMEMBER THIS POSE !!!', resize_mission_image)
-    cv2.moveWindow('!!! REMEMBER THIS POSE !!!',400,100)
-    k = cv2.waitKey(1) & 0xFF 
-    if k == 27:
-        break
-cv2.destroyAllWindows()
+# move detect를 위한 knn 모델 load
+knn = cv2.createBackgroundSubtractorKNN(history=1, dist2Threshold=10000, detectShadows=False)
 
 
 # 카운트 (카운트 후 게임 종료)
@@ -54,14 +39,14 @@ endTime = time.time() + total_game_time
 while camera.isOpened():
     ok, frame = camera.read()
 
-    # 웹캠 에러 처리    
+    # 0. 웹캠 에러 처리    
     if not ok:
         print('[ERROR] Camera error')
         break
 
     qts.total_frame_count += 1
 
-    # 움직임 탐지 프레임 설정
+    # 1-1. 움직임 탐지 프레임 설정
     mask = knn.apply(frame)
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
@@ -69,45 +54,49 @@ while camera.isOpened():
     cv2.putText(mask, robot_status, (10, 30),cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255), 2)
 
 
-    # 포즈 탐지 프레임 설정
+    # 1-2. 포즈 탐지 프레임 설정
     frame = cv2.flip(frame, 1)
     frame_height, frame_width, _ =  frame.shape
     frame = cv2.resize(frame, (int(frame_width * (640 / frame_height)), 640))
 
 
-    # 움직임 탐지 main 
+    # 2. 음악 재생 및 mission image 출력
+    if qts.play_sound_tf == False:  
+        qts._start_game(pose_file_list, sound_file_name)
+
+
+    # 3-1. 움직임 탐지 main 
     label = qts._move_detect(mask, display=False)
     cv2.imshow('move_detect', mask)
     cv2.moveWindow('move_detect',1000,50)
-    cv2.resizeWindow('move_detect', 250, 250)
+    cv2.resizeWindow('move_detect', 300, 300)
 
 
-    # 포즈 탐지 main
+    # 3-2. 포즈 탐지 main 
     frame, landmarks = qts._pose_detect(frame, display=False)
     if landmarks:
         label = qts._pose_classify(landmarks, frame, display=False)
-        
     cv2.imshow('pose_detect', frame)
     cv2.moveWindow('pose_detect', 50, 50)
     cv2.resizeWindow('pose_detect', 900, 600)
 
 
-    # 종료 조건
-    # 1. ESC 키를 누를 경우 종료
+    # 4. 종료 조건
+    # 4-1. ESC 키를 누를 경우
     k = cv2.waitKey(1) & 0xFF 
     if k == 27:
         break
     
-    # 2. endTime이 초과할 경우 종료
+    # 4-2. endTime이 초과할 경우
     if time.time() > endTime:
         break
-
 
 
 camera.release()
 cv2.destroyAllWindows()
 
-# moveTime = round(qts.move_total_time,3)
+
+# 결과 출력
 print()
 print('====== game result ======')
 print()
