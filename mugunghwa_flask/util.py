@@ -15,6 +15,7 @@ class util():
 
     # __init__() : 변수 초기화 함수
     def __init__(self):
+
         # 게임 시작부터 종료까지의 웹캠 frame 수
         self.total_frame_count = 0
         
@@ -187,7 +188,7 @@ class util():
             if self.pose_start_time != 0:
                 end = time.time()
                 tmp = end - self.pose_start_time
-                self.pose_result_time = round(tmp, 3)
+                self.pose_result_time += round(tmp, 3)
                 self.pose_start_time = 0
         elif label == self.mission_pose:
             # 일치하는 pose인 frame일 경우 count
@@ -197,7 +198,7 @@ class util():
             
 
         # output image에 label 추가
-        cv2.putText(output_image, label, (10, 30),cv2.FONT_HERSHEY_PLAIN, 2, color, 2)
+        cv2.putText(output_image, label, (10, 60),cv2.FONT_HERSHEY_PLAIN, 2, color, 2)
         
         # 결과 image 표시
         if display:
@@ -230,7 +231,7 @@ class util():
             if self.move_start_time != 0:
                 end = time.time()
                 tmp = end - self.move_start_time
-                self.move_result_time = round(tmp, 3)
+                self.move_result_time += round(tmp, 3)
                 self.move_start_time = 0
         elif label == 'move':
             if self.move_start_time == 0:
