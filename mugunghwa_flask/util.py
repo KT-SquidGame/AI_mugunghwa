@@ -17,23 +17,23 @@ class util():
     def __init__(self):
 
         # 게임 시작부터 종료까지의 웹캠 frame 수
-        self.total_frame_count = 0
+        # self.total_frame_count = 0
         
         # mission image에 대한 값
         self.mission_pose = ''
 
-        # move detect에 대한 시간 측정
-        self.move_start_time = 0 
-        self.move_result_time = 0 
+        # not move detect에 대한 시간 측정
         self.move_frame_count = 0
+        # self.move_start_time = 0 
+        # self.move_result_time = 0 
 
-        # pose detect에 대한 시간 측정
-        self.pose_start_time = 0 
-        self.pose_result_time = 0 
+        # correct pose detect에 대한 시간 측정
         self.pose_frame_count = 0
+        # self.pose_start_time = 0 
+        # self.pose_result_time = 0 
 
         # 음악 재생 여부
-        self.play_sound_tf = False
+        # self.play_sound_tf = False
 
         # 움직임 탐지 임계 값
         self.MOVE_THRESHOLD = 2000 
@@ -181,24 +181,24 @@ class util():
                 label = 'Tree Pose'
 
         if label != 'Unknown Pose':
+            self.pose_frame_count += 1
             color = (0, 255, 0)  
 
-        # 시간 계산
-        if label == 'Unknown Pose':
-            if self.pose_start_time != 0:
-                end = time.time()
-                tmp = end - self.pose_start_time
-                self.pose_result_time += round(tmp, 3)
-                self.pose_start_time = 0
-        elif label == self.mission_pose:
-            # 일치하는 pose인 frame일 경우 count
-            self.pose_frame_count += 1
-            if self.pose_start_time == 0:
-                self.pose_start_time = time.time()
+        # # 시간 계산
+        # if label == 'Unknown Pose':
+        #     if self.pose_start_time != 0:
+        #         end = time.time()
+        #         tmp = end - self.pose_start_time
+        #         self.pose_result_time += round(tmp, 3)
+        #         self.pose_start_time = 0
+        # elif label == self.mission_pose:
+        #     # 일치하는 pose인 frame일 경우 count
+        #     self.pose_frame_count += 1
+        #     if self.pose_start_time == 0:
+        #         self.pose_start_time = time.time()
             
-
         # output image에 label 추가
-        cv2.putText(output_image, label, (10, 60),cv2.FONT_HERSHEY_PLAIN, 2, color, 2)
+        cv2.putText(output_image, label, (10, 30),cv2.FONT_HERSHEY_PLAIN, 2, color, 2)
         
         # 결과 image 표시
         if display:
@@ -224,52 +224,52 @@ class util():
             self.move_frame_count += 1
 
         # output image에 label 추가
-        cv2.putText(mask, label, (10, 60),cv2.FONT_HERSHEY_PLAIN, 2, (127, 127, 127), 2)
+        cv2.putText(mask, 'player status : ' + label, (10, 30), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,0), 2)
 
         # 시간 계산
-        if label == 'not move':
-            if self.move_start_time != 0:
-                end = time.time()
-                tmp = end - self.move_start_time
-                self.move_result_time += round(tmp, 3)
-                self.move_start_time = 0
-        elif label == 'move':
-            if self.move_start_time == 0:
-                self.move_start_time = time.time()
+        # if label == 'not move':
+        #     if self.move_start_time != 0:
+        #         end = time.time()
+        #         tmp = end - self.move_start_time
+        #         self.move_result_time += round(tmp, 3)
+        #         self.move_start_time = 0
+        # elif label == 'move':
+        #     if self.move_start_time == 0:
+        #         self.move_start_time = time.time()
 
         return label
 
 
 
 
-    def _start_game(self, pose_file_list, sound_file_name):
-        # 미션 문제 설정
-        pose_file_name = pose_file_list[random.randint(0,len(pose_file_list)-1)]
+    # def _start_game(self, pose_file_list, sound_file_name):
+    #     # 미션 문제 설정
+    #     pose_file_name = pose_file_list[random.randint(0,len(pose_file_list)-1)]
         
-        # 함수가 최초 동작할 때만 mission_pose 지정
-        if self.mission_pose == '':
-            self.mission_pose = pose_file_name
+    #     # 함수가 최초 동작할 때만 mission_pose 지정
+    #     if self.mission_pose == '':
+    #         self.mission_pose = pose_file_name
 
-        mission_image = cv2.imread('images/' + pose_file_name + '.jpg', cv2.IMREAD_COLOR)
-        resize_mission_image = cv2.resize(mission_image, dsize=(640, 480))
+    #     mission_image = cv2.imread('images/' + pose_file_name + '.jpg', cv2.IMREAD_COLOR)
+    #     resize_mission_image = cv2.resize(mission_image, dsize=(640, 480))
 
-        # 음성 출력 및 미션 문제 출력
-        wave_obj = sa.WaveObject.from_wave_file('sound/' + sound_file_name)
-        play_obj = wave_obj.play()
+    #     # 음성 출력 및 미션 문제 출력
+    #     wave_obj = sa.WaveObject.from_wave_file('sound/' + sound_file_name)
+    #     play_obj = wave_obj.play()
         
-        cv2.namedWindow('!!! REMEMBER THIS POSE !!!', cv2.WINDOW_NORMAL)
-        cv2.imshow('!!! REMEMBER THIS POSE !!!', resize_mission_image)
-        cv2.moveWindow('!!! REMEMBER THIS POSE !!!',400,100)
+    #     cv2.namedWindow('!!! REMEMBER THIS POSE !!!', cv2.WINDOW_NORMAL)
+    #     cv2.imshow('!!! REMEMBER THIS POSE !!!', resize_mission_image)
+    #     cv2.moveWindow('!!! REMEMBER THIS POSE !!!',400,100)
 
-        # 음성 출력 및 미션 문제 출력 (음성 종료 시 미션 문제 종료)
-        # while play_obj.is_playing():
-        #     cv2.namedWindow('!!! REMEMBER THIS POSE !!!', cv2.WINDOW_NORMAL)
-        #     cv2.imshow('!!! REMEMBER THIS POSE !!!', resize_mission_image)
-        #     cv2.moveWindow('!!! REMEMBER THIS POSE !!!',400,100)
-        #     k = cv2.waitKey(1) & 0xFF 
-        #     if k == 27:
-        #         break
-        # cv2.destroyAllWindows()
+    #     # 음성 출력 및 미션 문제 출력 (음성 종료 시 미션 문제 종료)
+    #     # while play_obj.is_playing():
+    #     #     cv2.namedWindow('!!! REMEMBER THIS POSE !!!', cv2.WINDOW_NORMAL)
+    #     #     cv2.imshow('!!! REMEMBER THIS POSE !!!', resize_mission_image)
+    #     #     cv2.moveWindow('!!! REMEMBER THIS POSE !!!',400,100)
+    #     #     k = cv2.waitKey(1) & 0xFF 
+    #     #     if k == 27:
+    #     #         break
+    #     # cv2.destroyAllWindows()
     
-        self.play_sound_tf = True
+    #     self.play_sound_tf = True
         
