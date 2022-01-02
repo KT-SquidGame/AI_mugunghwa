@@ -16,11 +16,11 @@ qts = util()
 robot_status = 'Scanning...' 
 sound_file_name = 'assets_sound.wav'
 result_status = [1,2,3]
-mission_pose = ['T', 'Tree', 'Warrior']
+mission_pose = ['T Pose', 'Tree Pose', 'Warrior Pose']
 knn = cv2.createBackgroundSubtractorKNN(history=1, dist2Threshold=10000, detectShadows=False)
 
 # 게임 시간과 결과 점수에 대한 변수 설정
-total_game_time = 10
+total_game_time = 20
 end_time = 0
 now = 0
 result_score = 0
@@ -37,9 +37,12 @@ def index():
     global end_time
     end_time = time.time() + total_game_time
     # end_time = time.time() + total_game_time
+
+    qts.mission_pose = mission_pose[random.randint(0,0)]
+
     templateData = {
             'title': 'mission pose',
-            'mission_pose': str(mission_pose[random.randint(0,2)])
+            'mission_pose': qts.mission_pose   
     }
     return render_template('index.html', **templateData)
 
@@ -67,6 +70,8 @@ def move_main():
 @app.route('/result_main')
 def result_main():
     global result_score
+    if result_score != 0:
+        print(result_score)
     return result_score
 
 
@@ -94,9 +99,10 @@ def timer():
                     timeout_tf = True
                     result_score_of_move = qts.move_frame_count
                     result_score_of_pose = qts.pose_frame_count
-                    if result_score_of_move < 200 & result_score_of_pose < 100:
+                    # 총 frame = 750
+                    if result_score_of_move > 600 & result_score_of_pose > 200:
                         result_score = result_status[0]
-                    elif result_score_of_move < 100 & result_score_of_pose < 50:
+                    elif result_score_of_move > 300 & result_score_of_pose > 100:
                         result_score = result_status[1]
                     else:
                         result_score = result_status[2]
