@@ -198,7 +198,7 @@ class util():
         #         self.pose_start_time = time.time()
             
         # output image에 label 추가
-        cv2.putText(output_image, label, (10, 30),cv2.FONT_HERSHEY_PLAIN, 2, color, 2)
+        cv2.putText(output_image, label, (10, 120),cv2.FONT_HERSHEY_PLAIN, 2, color, 2)
         
         # 결과 image 표시
         if display:
@@ -224,7 +224,7 @@ class util():
             self.move_frame_count += 1
 
         # output image에 label 추가
-        cv2.putText(mask, 'player status : ' + label, (10, 30), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,0), 2)
+        cv2.putText(mask, 'player status : ' + label, (10, 30), cv2.FONT_HERSHEY_PLAIN, 3, (255,255,0), 2)
 
         # 시간 계산
         # if label == 'not move':

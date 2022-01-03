@@ -22,7 +22,8 @@ knn = cv2.createBackgroundSubtractorKNN(history=1, dist2Threshold=10000, detectS
 total_game_time = 20
 end_time = 0
 now = 0
-result_score = 0
+global result_score
+result_score = '0'
 timeout_tf = False
 result_score_of_move = 0
 result_score_of_pose = 0
@@ -52,6 +53,7 @@ def index():
             'title': 'mission pose',
             'mission_pose': qts.mission_pose   
     }
+
     return render_template('index.html', **templateData)
 
 
@@ -86,6 +88,7 @@ def result_main():
 
 ###### 기능 구현 함수 ######
 
+# not use
 def timer():
     camera = cv2.VideoCapture(0)
     while(True):
@@ -111,19 +114,17 @@ def timer():
                     result_score_of_pose = qts.pose_frame_count
                     # 상
                     if result_score_of_move > 400 & result_score_of_pose > 100:
-                        result_score = 3
+                        result_score = '1'
                     # 중
                     elif result_score_of_move > 200 & result_score_of_pose > 50:
-                        result_score = 2
+                        result_score = '2'
                     # 하
                     else:
-                        result_score = 1
+                        result_score = '3'
 
                 cv2.putText(blank, 'score (move) : ' + str(result_score_of_move), (10, 30),cv2.FONT_HERSHEY_PLAIN, 2.3, (0,0,255), 2)
                 cv2.putText(blank, 'score (pose) : ' + str(result_score_of_pose), (10, 60),cv2.FONT_HERSHEY_PLAIN, 2.3, (0,0,255), 2)
                 cv2.putText(blank, '>> score (total) : ' + str(result_score), (10, 90),cv2.FONT_HERSHEY_PLAIN, 2.3, (0,0,255), 2)
-                
-                
                     
             else:
                 left_time = str(tmp)
@@ -137,8 +138,6 @@ def timer():
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-
 
 
 def move():
@@ -158,13 +157,12 @@ def move():
             # 움직임 탐지 main
             label = qts._move_detect(mask, display=False)
 
-            cv2.putText(mask, 'robot status : ' + robot_status, (10, 60), cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255), 2)
+            cv2.putText(mask, 'robot status : ' + robot_status, (10, 60), cv2.FONT_HERSHEY_PLAIN, 3, (255,255,255), 2)
 
             ret, buffer = cv2.imencode('.jpg', mask)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
 
 
 def pose():
@@ -177,6 +175,41 @@ def pose():
             frame = cv2.flip(frame, 1)
             frame_height, frame_width, _ =  frame.shape
             frame = cv2.resize(frame, (int(frame_width * (640 / frame_height)), 640))
+
+            # 타이머
+            global end_time
+            global timeout_tf
+            global result_score
+            global result_score_of_move
+            global result_score_of_pose
+
+            # #putText : 남은 시간
+            now = time.time()
+            tmp = round(end_time - now,3)
+            # 남은 시간이 음수(0)라면, 타이머 종료, 결과 보여주기
+            if tmp < 0:
+                if timeout_tf == False:
+                    timeout_tf = True
+                    result_score_of_move = qts.move_frame_count
+                    result_score_of_pose = qts.pose_frame_count
+                    # 상
+                    if result_score_of_move > 400 & result_score_of_pose > 100:
+                        result_score = '1'
+                    # 중
+                    elif result_score_of_move > 200 & result_score_of_pose > 50:
+                        result_score = '2'
+                    # 하
+                    else:
+                        result_score = '3'
+                cv2.putText(frame, 'score (move) : ' + str(result_score_of_move), (10, 30),cv2.FONT_HERSHEY_PLAIN, 2.3, (255, 0, 0), 2)
+                cv2.putText(frame, 'score (pose) : ' + str(result_score_of_pose), (10, 60),cv2.FONT_HERSHEY_PLAIN, 2.3, (255, 0, 0), 2)
+                cv2.putText(frame, '!!! Time Out !!!', (10, 90),cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255), 2)
+            else:
+                left_time = str(tmp)
+                cv2.putText(frame, 'not move frame count : ' + str(qts.move_frame_count), (10, 30),cv2.FONT_HERSHEY_PLAIN, 2.3, (255,0,0), 2)
+                cv2.putText(frame, 'correct pose frame count : ' + str(qts.pose_frame_count), (10, 60),cv2.FONT_HERSHEY_PLAIN, 2.3, (255,0,0), 2)
+                cv2.putText(frame, left_time + ' seconds left.', (10, 90),cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255), 2)
+
             
             # 포즈 탐지 main
             frame, landmarks = qts._pose_detect(frame, display=False)
