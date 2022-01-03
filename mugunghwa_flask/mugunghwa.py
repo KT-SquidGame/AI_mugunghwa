@@ -35,6 +35,9 @@ def index():
     wave_obj = sa.WaveObject.from_wave_file('sound/' + sound_file_name)
     play_obj = wave_obj.play()
 
+    global result_score
+    result_score = '0'
+
     qts.move_frame_count = 0
     qts.pose_frame_count = 0
     # qts.move_start_time = 0
@@ -80,8 +83,15 @@ def move_main():
 @app.route('/result_main')
 def result_main():
     global result_score
-    print(result_score)
-    return result_score
+    while(True):
+        if result_score != '0':
+            return result_score
+        else:
+            continue
+    # print(result_score)
+    # if result_score != '0':
+    #     return result_score
+    # else
 
 
 
