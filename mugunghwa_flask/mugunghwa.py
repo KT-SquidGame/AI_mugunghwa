@@ -8,12 +8,17 @@ from flask import Flask, render_template, Response
 from util import *
 import simpleaudio as sa
 import random
+from flask_cors import CORS
 
 
 # 변수 설정
 app = Flask(__name__)
+CORS(app)
+
+
+
 qts = util()
-robot_status = 'Scanning...' 
+robot_status = 'Scanning...'
 sound_file_name = 'assets_sound.wav'
 mission_pose = ['T Pose', 'Tree Pose', 'Warrior Pose']
 knn = cv2.createBackgroundSubtractorKNN(history=1, dist2Threshold=10000, detectShadows=False)
@@ -35,6 +40,8 @@ def index():
     wave_obj = sa.WaveObject.from_wave_file('sound/' + sound_file_name)
     play_obj = wave_obj.play()
 
+    global timeout_tf
+    timeout_tf = False
     global result_score
     result_score = '0'
 
@@ -57,14 +64,9 @@ def index():
             'mission_pose': qts.mission_pose   
     }
 
-    return render_template('index.html', **templateData)
+    # return render_template('index.html', **templateData)
+    return str(qts.mission_pose)
 
-
-
-
-@app.route('/timer_main')
-def timer_main():
-    return Response(timer(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 
@@ -83,72 +85,13 @@ def move_main():
 @app.route('/result_main')
 def result_main():
     global result_score
-    while(True):
-        if result_score != '0':
-            return result_score
-        else:
-            continue
-    # print(result_score)
-    # if result_score != '0':
-    #     return result_score
-    # else
+    print(result_score)
+    return result_score
 
 
 
 
 ###### 기능 구현 함수 ######
-
-# not use
-def timer():
-    camera = cv2.VideoCapture(0)
-    while(True):
-        success, frame = camera.read()  
-        if not success:
-            break
-        else:
-            blank = np.zeros((360, 640, 3), np.uint8)
-            global end_time
-            global timeout_tf
-            global result_score
-            global result_score_of_move
-            global result_score_of_pose
-
-            # #putText : 남은 시간
-            now = time.time()
-            tmp = round(end_time - now,3)
-            # 남은 시간이 음수(0)라면, 타이머 종료, 결과 보여주기
-            if tmp < 0:
-                if timeout_tf == False:
-                    timeout_tf = True
-                    result_score_of_move = qts.move_frame_count
-                    result_score_of_pose = qts.pose_frame_count
-                    # 상
-                    if result_score_of_move > 400 & result_score_of_pose > 100:
-                        result_score = '1'
-                    # 중
-                    elif result_score_of_move > 200 & result_score_of_pose > 50:
-                        result_score = '2'
-                    # 하
-                    else:
-                        result_score = '3'
-
-                cv2.putText(blank, 'score (move) : ' + str(result_score_of_move), (10, 30),cv2.FONT_HERSHEY_PLAIN, 2.3, (0,0,255), 2)
-                cv2.putText(blank, 'score (pose) : ' + str(result_score_of_pose), (10, 60),cv2.FONT_HERSHEY_PLAIN, 2.3, (0,0,255), 2)
-                cv2.putText(blank, '>> score (total) : ' + str(result_score), (10, 90),cv2.FONT_HERSHEY_PLAIN, 2.3, (0,0,255), 2)
-                    
-            else:
-                left_time = str(tmp)
-                cv2.putText(blank, left_time + ' seconds left.', (10, 30),cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255), 2)
-                cv2.putText(blank, 'not move frame count : ' + str(qts.move_frame_count), (10, 60),cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255), 2)
-                cv2.putText(blank, 'correct pose frame count : ' + str(qts.pose_frame_count), (10, 90),cv2.FONT_HERSHEY_PLAIN, 2, (255,255,255), 2)
-                
-            
-
-            ret, buffer = cv2.imencode('.jpg', blank)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
 
 def move():
     camera = cv2.VideoCapture(0)
