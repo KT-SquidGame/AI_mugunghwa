@@ -1,4 +1,4 @@
-## 달고나 게임 Read Me
+## 무궁화 게임 Read Me
 
 <p align="center">
     
@@ -21,6 +21,9 @@
 
 
 
+## Tutorial
+<p align="center">
+    <h5>무궁화 꽃이 피었습니다~ 게임의 AI 플랫폼입니다.</h5>
 
 ## Features
 
