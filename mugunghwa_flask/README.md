@@ -63,9 +63,9 @@
 
 ## Contributor
 
-Maintainer : 김수연, 김서정
+Maintainer : 김주환
 
-Contributor : 김남협, 김주환, 박수정, 유동헌, 윤혜정, 조민호, 전민준, 허나연
+Contributor : 김남협, 김수연, 김서정, 박수정, 유동헌, 윤혜정, 조민호, 전민준, 허나연
 
 
 
